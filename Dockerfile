@@ -2,6 +2,9 @@ FROM python:3.12-alpine
 
 WORKDIR /usr/src/app
 
+# Install Bash
+RUN apk add --no-cache bash
+
 # prevent Python from writing .pyc files
 ENV PYTHONDONTWRITEBYTECODE 1
 # ensure Python ouput is sent directly to the te terminal without
@@ -15,4 +18,4 @@ COPY ./entrypoint.sh /usr/src/app/entrypoint.sh
 
 COPY . /usr/src/app/
 
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+ENTRYPOINT ["bash", "-e", "/usr/src/app/entrypoint.sh"]
