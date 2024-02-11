@@ -9,17 +9,13 @@ class PackageStatus(IntEnum):
     return [(key.value, key.name) for key in cls]
   
 class PackageType(Enum):
-  SMALL = (1000, 'S')
-  MEDIUM = (3000, 'M')
-  BIG = (5000, 'B')
-  
-  def __init__(self, value, label):
-    self._value_ = value
-    self.label = label
+  SMALL = 1000
+  MEDIUM = 3000
+  BIG = 5000
   
   @classmethod
   def choices(cls):
-    return [(key.value, key.label) for key in cls]
+    return [(key.value, key.name) for key in cls]
 
 class ReportStatus(StrEnum):
   BROKEN = 'B'

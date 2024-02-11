@@ -1,6 +1,15 @@
 from django.contrib import admin
 from logistic.models import Client, Package, Sheet, ItemSheet, Report
-from logistic.utils import PackageType
+from logistic.utils import PackageType,PackageStatus
+
+def mark_packages_as_distributed(modeladmin, request, queryset):
+    for sheet in queryset:
+      item_sheets = ItemSheet.objects.filter(sheet=sheet)
+      for item_sheet in item_sheets:
+        item_sheet.package.status = PackageStatus.DISTRIBUTION
+        item_sheet.package.save()
+
+mark_packages_as_distributed.short_description = "Marcar paquetes como en distribución"
 
 class PackageInline(admin.TabularInline):
   model = Package
@@ -22,11 +31,10 @@ class PackageAdmin(admin.ModelAdmin):
         return None
       
   def save_model(self, request, obj, form, change):
-    for weight_limit,package_type in PackageType.choices():
-      if obj.weight < weight_limit:
+    for weight_limit, package_type in PackageType.choices():
+      if obj.weight <= weight_limit:
           obj.package_type = package_type
           break
-    obj.package_type = 'S'#PackageType.SMALL.label
     super().save_model(request, obj, form, change)
 
 
@@ -57,12 +65,23 @@ class ReportAdmin(admin.ModelAdmin):
   def has_change_permission(self, request, obj=None):
     return False
 
-#class SheetAdmin(admin.ModelAdmin):
-#  list_filter = ("date")
-#  date_hierachy = ("date")
+class ItemSheetInline(admin.TabularInline):
+    model = ItemSheet
+    extra = 0
+
+class SheetAdmin(admin.ModelAdmin):
+  list_display = ("sheet_number", "date")
+  list_filter = ["date"]
+  date_hierachy = ("date")
+  inlines = [ItemSheetInline]
+  actions = [mark_packages_as_distributed]
+
+class ItemSheetAdmin(admin.ModelAdmin):
+   readonly_fields = ["failure_reasons"]
+   list_display = ("position", "sheet", "package")
 
 admin.site.register(Client, ClientAdmin)
 admin.site.register(Package, PackageAdmin)
-admin.site.register(Sheet)
-admin.site.register(ItemSheet)
+admin.site.register(Sheet, SheetAdmin)
+admin.site.register(ItemSheet, ItemSheetAdmin)
 admin.site.register(Report,ReportAdmin)
