@@ -40,5 +40,5 @@ class Report(models.Model):
 class ItemSheet(models.Model):
   position = models.CharField(max_length=50)
   sheet = models.ForeignKey(Sheet, on_delete=models.RESTRICT)
-  package = models.ForeignKey(Package, on_delete=models.RESTRICT)
+  package = models.OneToOneField(Package, on_delete=models.RESTRICT)
   failure_reasons = models.ForeignKey(Report, on_delete=models.SET_NULL, null=True, blank=True)
